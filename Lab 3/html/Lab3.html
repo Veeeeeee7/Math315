@@ -1,0 +1,521 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>Math 315: Lab 3</title>
+<meta name="generator" content="MATLAB 24.2">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2025-02-27">
+<meta name="DC.source" content="Lab3.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>Math 315: Lab 3</h1>
+<!--introduction-->
+<p>The following lab uses MATLAB functions to compute norms and condition numbers to analyze the difference in error between GEPP and using the inverse of a matrix. These errors are then used to check the validity of the bounds derived in the problem set.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">Procedure 1</a>
+</li>
+<li>
+<a href="#6">Procedure 2</a>
+</li>
+</ul>
+</div>
+<h2 id="1">Procedure 1</h2>
+<p>In the first procedure, I will randomly generate 10 random matrices A with a random vector b and solve Ax=b. Using MatLab's svd function, I will create two random orthogonal matrices U and V. I will then discard the singular values and generate them using a log scale. Then, I will compute the matrix A = U * S * V'. I will then be able to calculate the accurate inverse of A, with only double precision round-off errors. Using this accurate inverse, I will be able to calculate the accurate solution x, which can then be used to compare the GEPP and inverse matrix solutions.</p>
+<pre class="codeinput">n = 256;
+sigma_1 = 10^4;
+sigma_n = 10^-4;
+
+rel_backward_err_inv = zeros(10, 1);
+rel_forward_err_inv  = zeros(10, 1);
+rel_backward_err_gepp = zeros(10, 1);
+rel_forward_err_gepp  = zeros(10, 1);
+
+saved_A = zeros(256,256,10);
+
+<span class="keyword">for</span> i = 1:10
+    <span class="comment">% Generate random matrix A, where the accurate inverse of A can be</span>
+    <span class="comment">% accurately computed</span>
+    [U, ~, V] = svd(randn(n));
+    svalues = logspace(log10(sigma_1), log10(sigma_n), n);
+    S = diag(svalues);
+    invS = diag(svalues.^-1);
+    A = U * S * V';
+    AccurateInv = V * invS * U';
+    Z = inv(A);
+
+    <span class="comment">% Save A for future use</span>
+    saved_A(:,:,i) = A;
+
+    <span class="comment">% Generate random vector b and calculate forward/backward error for</span>
+    <span class="comment">% solution x via inverse of A and GEPP</span>
+    b = randn(n, 1);
+    x = V * (invS * (U' * b));
+    xz = Z * b;
+    xg = linsolve(A, b);
+    rel_backward_err_inv(i) = norm(A * xz - b) / (norm(A) * norm(xz) + norm(b));
+    rel_forward_err_inv(i)  = norm(xz - x) / norm(x);
+    rel_backward_err_gepp(i) = norm(A * xg - b) / (norm(A) * norm(xg) + norm(b));
+    rel_forward_err_gepp(i)  = norm(xg - x) / norm(x);
+<span class="keyword">end</span>
+
+random_A_errs_inv = table(rel_backward_err_inv, rel_forward_err_inv, <span class="keyword">...</span>
+    <span class="string">'VariableNames'</span>, {<span class="string">'Backward_Err_via_Z'</span>, <span class="string">'Forward_Err_via_Z'</span>});
+disp([<span class="string">'Table of Relative Backward and Forward Error of Solutions of 10 Random '</span> <span class="keyword">...</span>
+    <span class="string">'Matrices A and vectors b via Inverse Z'</span>]);
+disp(random_A_errs_inv);
+
+random_A_errs_gepp = table( rel_backward_err_gepp, rel_forward_err_gepp, <span class="keyword">...</span>
+    <span class="string">'VariableNames'</span>, {<span class="string">'Backward_Err_via_GEPP'</span>, <span class="string">'Forward_Err_via_GEPP'</span>});
+disp([<span class="string">'Table of Relative Backward and Forward Error of Solutions of 10 Random '</span> <span class="keyword">...</span>
+    <span class="string">'Matrices A and vectors b via GEPP'</span>]);
+disp(random_A_errs_gepp);
+
+random_A_errs_comparison = table(abs(rel_backward_err_inv) ./ abs(rel_backward_err_gepp), <span class="keyword">...</span>
+    abs(rel_forward_err_inv) ./ abs(rel_forward_err_gepp), <span class="keyword">...</span>
+    <span class="string">'VariableNames'</span>, {<span class="string">'Ratio of Backward Err from Inverse to GEPP'</span>, [<span class="string">'Ratio '</span> <span class="keyword">...</span>
+    <span class="string">'Forward Err from Inverse to GEPP'</span>]});
+disp([<span class="string">'Table of Ratios of Relative Backward and Forward Error from Inverse Z '</span> <span class="keyword">...</span>
+    <span class="string">'to GEPP for Solutions of 10 Random Matrices A and vectors b. (Ratio = |err '</span> <span class="keyword">...</span>
+    <span class="string">'via inverse Z| - |err via GEPP|)'</span>]);
+disp(random_A_errs_comparison);
+</pre>
+<pre class="codeoutput">Table of Relative Backward and Forward Error of Solutions of 10 Random Matrices A and vectors b via Inverse Z
+     Backward_Err_via_Z      Forward_Err_via_Z  
+    ____________________    ____________________
+    8.56352250861516e-16     2.9250233903989e-09
+    7.08328296209199e-16    2.79039377140531e-09
+    8.88281395824223e-16    2.58343499092578e-09
+    8.33900200764145e-16    2.33850398700121e-09
+    8.78010850672803e-16    1.94080699590606e-09
+    6.12208566660369e-16    2.80712062244416e-09
+     1.0478563613987e-15    2.00065044648647e-09
+    1.62328369084254e-15    2.22725359495419e-09
+    1.12381754973926e-15    2.51202681722372e-09
+    8.58100205334546e-16    2.31866206695111e-09
+Table of Relative Backward and Forward Error of Solutions of 10 Random Matrices A and vectors b via GEPP
+    Backward_Err_via_GEPP    Forward_Err_via_GEPP
+    _____________________    ____________________
+    1.17645226320498e-16     2.92502580094233e-09
+    1.65943318175672e-16     2.79039325931744e-09
+    1.14762151497427e-16     2.58343417952925e-09
+    1.25048049924377e-16     2.33850249435096e-09
+    2.19236781222469e-16     1.94080735879348e-09
+    1.22181093657919e-16     2.80711976082018e-09
+    1.45714442389842e-16     2.00065084902993e-09
+    1.22747689754103e-16     2.22725375972381e-09
+    1.30571846174143e-16     2.51202713142356e-09
+    1.48151824889896e-16     2.31866105813157e-09
+Table of Ratios of Relative Backward and Forward Error from Inverse Z to GEPP for Solutions of 10 Random Matrices A and vectors b. (Ratio = |err via inverse Z| - |err via GEPP|)
+    Ratio of Backward Err from Inverse to GEPP    Ratio Forward Err from Inverse to GEPP
+    __________________________________________    ______________________________________
+                 7.27910751370883                           0.999999175889859           
+                 4.26849543564837                            1.00000018351817           
+                 7.74019469166315                            1.00000031407672           
+                 6.66863818562902                             1.0000006382932           
+                 4.00485194946302                           0.999999813022446           
+                 5.01066530288577                            1.00000030694237           
+                 7.19116337552377                           0.999999798793752           
+                 13.2245559496429                           0.999999926021175           
+                  8.6068902498356                           0.999999874921794           
+                 5.79203263930278                            1.00000043508711           
+</pre>
+<p>In the tables above, it's evident that solving systems using GEPP generally has lower relative backward error than using the inverse Z as all the values in the table of ratios between relative backward error of inverse Z to that of GEPP are greater than 1. However, there isn't a massive difference as the ratio isn't in the orders of magnitude of 10. Therefore, using the inverse Z to solve a linear system will be generally as accurate as GEPP, having around 1 decimal place of accuracy less than GEPP. Looking at the errors themself, it seems like they are all around the magnitude of epsilon meaning that the relative backward error seems to be bounded by epsilon time some small constant. This suggests that the O(machine epsilon) bound for backwards error of GEPP is accurate.</p>
+<p>To test if the bound is accurate for backwards error of inverse Z, I will calculate the bound using the last matrix calculated and compare with the largest relative backward error for inverse Z. As shown below the bound for relative backward error for inverse Z is also quite accurate.</p>
+<pre class="codeinput">norm_A_inv = norm(AccurateInv);
+norm_xz = norm(xz);
+norm_b = norm(b);
+
+fprintf(<span class="string">'Bound = O((||A^-1|| * ||b|| * 2*10^-16) / (||xz||) ~= %e\n'</span>, <span class="keyword">...</span>
+    norm_A_inv .* norm_b .* eps() ./ norm_xz);
+fprintf(<span class="string">'Largest actual error ~= %e\n'</span>, max(abs(rel_backward_err_inv)));
+</pre>
+<pre class="codeoutput">Bound = O((||A^-1|| * ||b|| * 2*10^-16) / (||xz||) ~= 1.182052e-15
+Largest actual error ~= 1.623284e-15
+</pre>
+<p>For relative forward error, the ratio is almost nearly one for every entry. This follows from equations (1.5) and (1.6) that show the bounds of relative forward error for solutions via GEPP and inverse Z are equal if Z is a sufficiently accurate inverse.</p>
+<p>I will use the calculated condition numbers below for the different matrices A to check if the bounds described in (1.5) and (1.6) are reasonable. Since they are all approximately 10^8 as shown below and the error bounds are approximately 10^8 * 2 * 10^-16 = 2 * 10^-8, which is just greater than the calculated relative errors. Hence, the bounds described in equations (1.5) and (1.6) are quite accurate.</p>
+<pre class="codeinput">
+<span class="keyword">for</span> i=1:10
+    c = cond(saved_A(:,:,i));
+    fprintf(<span class="string">'Matrix %d condition number: %e\n'</span>, i, c);
+<span class="keyword">end</span>
+</pre>
+<pre class="codeoutput">Matrix 1 condition number: 1.000000e+08
+Matrix 2 condition number: 1.000000e+08
+Matrix 3 condition number: 1.000000e+08
+Matrix 4 condition number: 1.000000e+08
+Matrix 5 condition number: 1.000000e+08
+Matrix 6 condition number: 1.000000e+08
+Matrix 7 condition number: 1.000000e+08
+Matrix 8 condition number: 1.000000e+08
+Matrix 9 condition number: 1.000000e+08
+Matrix 10 condition number: 1.000000e+08
+</pre>
+<h2 id="6">Procedure 2</h2>
+<p>In the second procedure, I will randomly generate a single matrix A using MatLab's svd function in the same way as procedure 1 to ensure an accurate inverse can be calculated. I will then solve the equation Ax=uj where uj equals each of the left singular vectors of A. Using the solution from the accurate inverse, I will then calculate the relative backward and forward error of these solutions.</p>
+<pre class="codeinput">
+<span class="comment">% Generate random matrix A, where the accurate inverse of A can be</span>
+<span class="comment">% accurately computed</span>
+n = 256;
+sigma_1 = 10^4;
+sigma_n = 10^-4;
+[U2, ~, V2] = svd(randn(n));
+svalues2 = logspace(log10(sigma_1), log10(sigma_n), n);
+S2 = diag(svalues2);
+invS2 = diag(svalues2.^-1);
+A2 = U2 * S2 * V2';
+AccurateInv2 = V2 * invS2 * U2';
+Z2 = inv(A2);
+</pre>
+<p>For each left singular vector in U, I will solve Ax=uj and calculate relative backward and forward error using the rel_err_u() function displayed below.</p>
+<pre class="codeinput">disp(fileread(<span class="string">"rel_err_u.m"</span>));
+</pre>
+<pre class="codeoutput">function [rel_forward_err_inv, rel_backward_err_inv, rel_forward_err_gepp, rel_backward_err_gepp] = rel_err_u(A, U, S, V, Z, k)
+    x2 = Z * U(:,k);
+    b2 = U * (S * (V' * x2));
+    x2z = Z * b2;
+    rel_forward_err_inv = norm(x2z - x2) / norm(x2);
+    rel_backward_err_inv = norm(A * x2z - b2) / (norm(A) * norm(x2z) + norm(b2));
+    x2g = linsolve(A, b2);
+    rel_forward_err_gepp = norm(x2g - x2) / norm(x2);
+    rel_backward_err_gepp = norm(A * x2g - b2) / (norm(A) * norm(x2g) + norm(b2));
+
+
+</pre>
+<pre class="codeinput">rel_backward_err_inv2 = zeros(256, 1);
+rel_forward_err_inv2  = zeros(256, 1);
+rel_backward_err_gepp2 = zeros(256, 1);
+rel_forward_err_gepp2  = zeros(256, 1);
+<span class="keyword">for</span> i = 1:256
+    [rel_forward_err_inv2(i), rel_backward_err_inv2(i), rel_forward_err_gepp2(i), <span class="keyword">...</span>
+        rel_backward_err_gepp2(i)] = rel_err_u(A2, U2, S2, V2, Z2, i);
+<span class="keyword">end</span>
+
+figure();
+loglog(svalues2, rel_backward_err_inv2, svalues2, rel_backward_err_gepp2);
+xlabel(<span class="string">'Singular Value \sigma_j Corresponding to u_j'</span>);
+ylabel(<span class="string">'Relative Backward Error of Ax=u_j'</span>);
+legend(<span class="string">'Inverse Z'</span>, <span class="string">'GEPP'</span>);
+title(<span class="string">'Relative Backward Error vs Singular Value \sigma_j'</span>)
+
+figure();
+loglog(svalues2, rel_forward_err_inv2, svalues2, rel_forward_err_gepp2);
+xlabel(<span class="string">'Singular Value \sigma_j Corresponding to u_j'</span>);
+ylabel(<span class="string">'Relative Forward Error of Ax=u_j'</span>);
+legend(<span class="string">'Inverse Z'</span>, <span class="string">'GEPP'</span>);
+title(<span class="string">'Relative Forward Error vs Singular Value \sigma_j'</span>)
+</pre>
+<img vspace="5" hspace="5" src="Lab3_01.png" alt=""> <img vspace="5" hspace="5" src="Lab3_02.png" alt=""> <p>From the first graph, we can see a major difference in relative backward error between using inverse Z and GEPP. Nearly 6 digits of accuracy were lost when the vector corresponding to the largest singular value was used. This is because the bound for relative backward error for inverse Z can be simplified to O(corresponding singular value / minimum singular value) as shown in problem #5 in the attached PDF. This formula suggests that as the singular values corresponding to the left singular vectors used for b increase, the bound on relative backward error will also increase. This is reflected in the graph as the relative errors follow a pretty linearly increasing line as the corresponding singular value increases.</p>
+<p>To check the accuracy of this bound, I will calculate the ratio of the largest and smallest singular value, then multiplied by machine epsilon. Comparing this to the actual largest backward error from inverse Z will show that this bound is accurate.</p>
+<pre class="codeinput">fprintf(<span class="string">'Bound = %e\n'</span>, (sigma_1 ./ sigma_n) .* eps());
+fprintf(<span class="string">'Largest actual error = %e\n'</span>, max(abs(rel_backward_err_inv2)));
+</pre>
+<pre class="codeoutput">Bound = 2.220446e-08
+Largest actual error = 1.013771e-09
+</pre>
+<p>Also from the first graph, the relative backward error of GEPP is around machine epsilon as predicted by the bound of O(machine epsilon). Therefore this error bound for GEPP is accurate.</p>
+<p>Lastly, the second graph showcasing relative forward error doesn't have a significant difference between the error from using inverse Z and using GEPP. The errors are generally of one magnitude of 10 or less, meaning that at most one digit of accuracy was lost when solving using inverse Z as compared to GEPP. From the condition number of A calculated below, we can approximate the bound to be around 10^8 * 2 * 10^-16 = 2 * 10^-8. Hence, the error bound for forward error is also accurate.</p>
+<pre class="codeinput">fprintf(<span class="string">'Condition number of A: %e\n'</span>, cond(A2));
+fprintf(<span class="string">'Largest actual error of inverse Z = %e\n'</span>, max(abs(rel_forward_err_inv2)));
+fprintf(<span class="string">'Largest actual error of GEPP = %e\n'</span>, max(abs(rel_forward_err_gepp2)));
+</pre>
+<pre class="codeoutput">Condition number of A: 1.000000e+08
+Largest actual error of inverse Z = 1.712679e-08
+Largest actual error of GEPP = 1.241192e-08
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2024b</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% Math 315: Lab 3
+% The following lab uses MATLAB functions to compute norms and condition
+% numbers to analyze the difference in error between GEPP and using the
+% inverse of a matrix. These errors are then used to check the validity of
+% the bounds derived in the problem set.
+
+%% Procedure 1
+% In the first procedure, I will randomly generate 10 random matrices A
+% with a random vector b and solve Ax=b. Using MatLab's svd function, I
+% will create two random orthogonal matrices U and V. I will then discard the
+% singular values and generate them using a log scale. Then, I will compute
+% the matrix A = U * S * V'. I will then be able to calculate the accurate
+% inverse of A, with only double precision round-off errors. Using this 
+% accurate inverse, I will be able to calculate the accurate solution x, 
+% which can then be used to compare the GEPP and inverse matrix solutions.
+% 
+
+n = 256;
+sigma_1 = 10^4;
+sigma_n = 10^-4;
+
+rel_backward_err_inv = zeros(10, 1);
+rel_forward_err_inv  = zeros(10, 1);
+rel_backward_err_gepp = zeros(10, 1);
+rel_forward_err_gepp  = zeros(10, 1);
+
+saved_A = zeros(256,256,10);
+
+for i = 1:10
+    % Generate random matrix A, where the accurate inverse of A can be
+    % accurately computed
+    [U, ~, V] = svd(randn(n));
+    svalues = logspace(log10(sigma_1), log10(sigma_n), n);
+    S = diag(svalues);
+    invS = diag(svalues.^-1);
+    A = U * S * V';
+    AccurateInv = V * invS * U';
+    Z = inv(A);
+    
+    % Save A for future use
+    saved_A(:,:,i) = A;
+
+    % Generate random vector b and calculate forward/backward error for
+    % solution x via inverse of A and GEPP
+    b = randn(n, 1);
+    x = V * (invS * (U' * b));
+    xz = Z * b;
+    xg = linsolve(A, b);
+    rel_backward_err_inv(i) = norm(A * xz - b) / (norm(A) * norm(xz) + norm(b));
+    rel_forward_err_inv(i)  = norm(xz - x) / norm(x);
+    rel_backward_err_gepp(i) = norm(A * xg - b) / (norm(A) * norm(xg) + norm(b));
+    rel_forward_err_gepp(i)  = norm(xg - x) / norm(x);
+end
+
+random_A_errs_inv = table(rel_backward_err_inv, rel_forward_err_inv, ...
+    'VariableNames', {'Backward_Err_via_Z', 'Forward_Err_via_Z'});
+disp(['Table of Relative Backward and Forward Error of Solutions of 10 Random ' ...
+    'Matrices A and vectors b via Inverse Z']);
+disp(random_A_errs_inv);
+
+random_A_errs_gepp = table( rel_backward_err_gepp, rel_forward_err_gepp, ...
+    'VariableNames', {'Backward_Err_via_GEPP', 'Forward_Err_via_GEPP'});
+disp(['Table of Relative Backward and Forward Error of Solutions of 10 Random ' ...
+    'Matrices A and vectors b via GEPP']);
+disp(random_A_errs_gepp);
+
+random_A_errs_comparison = table(abs(rel_backward_err_inv) ./ abs(rel_backward_err_gepp), ...
+    abs(rel_forward_err_inv) ./ abs(rel_forward_err_gepp), ...
+    'VariableNames', {'Ratio of Backward Err from Inverse to GEPP', ['Ratio ' ...
+    'Forward Err from Inverse to GEPP']});
+disp(['Table of Ratios of Relative Backward and Forward Error from Inverse Z ' ...
+    'to GEPP for Solutions of 10 Random Matrices A and vectors b. (Ratio = |err ' ...
+    'via inverse Z| - |err via GEPP|)']);
+disp(random_A_errs_comparison);
+
+%%
+% In the tables above, it's evident that solving systems using GEPP generally 
+% has lower relative backward error than using the inverse Z as all the values 
+% in the table of ratios between relative backward error of inverse Z to 
+% that of GEPP are greater than 1. However, there isn't a massive difference
+% as the ratio isn't in the orders of magnitude of 10. Therefore, using the 
+% inverse Z to solve a linear system will be generally as accurate as GEPP, 
+% having around 1 decimal place of accuracy less than GEPP. Looking at the 
+% errors themself, it seems like they are all around the magnitude of epsilon 
+% meaning that the relative backward error seems to be bounded by epsilon 
+% time some small constant. This suggests that the O(machine epsilon) bound 
+% for backwards error of GEPP is accurate. 
+
+%%
+% To test if the bound is accurate for backwards error of inverse Z, I will 
+% calculate the bound using the last matrix calculated and
+% compare with the largest relative backward error for inverse Z. As shown
+% below the bound for relative backward error for inverse Z is also quite
+% accurate.
+
+norm_A_inv = norm(AccurateInv);
+norm_xz = norm(xz);
+norm_b = norm(b);
+
+fprintf('Bound = O((||A^-1|| * ||b|| * 2*10^-16) / (||xz||) ~= %e\n', ...
+    norm_A_inv .* norm_b .* eps() ./ norm_xz);
+fprintf('Largest actual error ~= %e\n', max(abs(rel_backward_err_inv)));
+
+%%
+% For relative forward error, the ratio is almost nearly one for every entry. 
+% This follows from equations (1.5) and (1.6) that show the bounds of relative 
+% forward error for solutions via GEPP and inverse Z are equal if Z is a 
+% sufficiently accurate inverse.
+
+%%
+% I will use the calculated condition numbers below for the different matrices 
+% A to check if the bounds described in (1.5) and (1.6) are reasonable. Since 
+% they are all approximately 10^8 as shown below and the error bounds are
+% approximately 10^8 * 2 * 10^-16 = 2 * 10^-8, which is just greater than the
+% calculated relative errors. Hence, the bounds described in equations (1.5) 
+% and (1.6) are quite accurate.
+
+for i=1:10
+    c = cond(saved_A(:,:,i));
+    fprintf('Matrix %d condition number: %e\n', i, c);
+end
+
+%% Procedure 2
+% In the second procedure, I will randomly generate a single matrix A using
+% MatLab's svd function in the same way as procedure 1 to ensure an accurate 
+% inverse can be calculated. I will then solve the equation Ax=uj where uj
+% equals each of the left singular vectors of A. Using the solution from
+% the accurate inverse, I will then calculate the relative backward and 
+% forward error of these solutions.
+
+% Generate random matrix A, where the accurate inverse of A can be
+% accurately computed
+n = 256;
+sigma_1 = 10^4;
+sigma_n = 10^-4;
+[U2, ~, V2] = svd(randn(n));
+svalues2 = logspace(log10(sigma_1), log10(sigma_n), n);
+S2 = diag(svalues2);
+invS2 = diag(svalues2.^-1);
+A2 = U2 * S2 * V2';
+AccurateInv2 = V2 * invS2 * U2';
+Z2 = inv(A2);
+
+%%
+% For each left singular vector in U, I will solve Ax=uj and calculate 
+% relative backward and forward error using the rel_err_u() function 
+% displayed below.
+
+disp(fileread("rel_err_u.m"));
+
+%%
+rel_backward_err_inv2 = zeros(256, 1);
+rel_forward_err_inv2  = zeros(256, 1);
+rel_backward_err_gepp2 = zeros(256, 1);
+rel_forward_err_gepp2  = zeros(256, 1);
+for i = 1:256
+    [rel_forward_err_inv2(i), rel_backward_err_inv2(i), rel_forward_err_gepp2(i), ...
+        rel_backward_err_gepp2(i)] = rel_err_u(A2, U2, S2, V2, Z2, i);
+end
+
+figure();
+loglog(svalues2, rel_backward_err_inv2, svalues2, rel_backward_err_gepp2);
+xlabel('Singular Value \sigma_j Corresponding to u_j');
+ylabel('Relative Backward Error of Ax=u_j');
+legend('Inverse Z', 'GEPP');
+title('Relative Backward Error vs Singular Value \sigma_j')
+
+figure();
+loglog(svalues2, rel_forward_err_inv2, svalues2, rel_forward_err_gepp2);
+xlabel('Singular Value \sigma_j Corresponding to u_j');
+ylabel('Relative Forward Error of Ax=u_j');
+legend('Inverse Z', 'GEPP');
+title('Relative Forward Error vs Singular Value \sigma_j')
+
+%%
+% From the first graph, we can see a major difference in relative backward 
+% error between using inverse Z and GEPP. Nearly 6 digits of accuracy were 
+% lost when the vector corresponding to the largest singular value was used. 
+% This is because the bound for relative backward error for inverse Z can be 
+% simplified to O(corresponding singular value / minimum singular value) as 
+% shown in problem #5 in the attached PDF. This formula suggests that as the 
+% singular values corresponding to the left singular vectors used for b
+% increase, the bound on relative backward error will also increase. This
+% is reflected in the graph as the relative errors follow a pretty
+% linearly increasing line as the corresponding singular value increases.
+
+%%
+% To check the accuracy of this bound, I will calculate the ratio of the
+% largest and smallest singular value, then multiplied by machine epsilon.
+% Comparing this to the actual largest backward error from inverse Z will 
+% show that this bound is accurate.
+
+fprintf('Bound = %e\n', (sigma_1 ./ sigma_n) .* eps());
+fprintf('Largest actual error = %e\n', max(abs(rel_backward_err_inv2)));
+
+%%
+% Also from the first graph, the relative backward error of GEPP is around 
+% machine epsilon as predicted by the bound of O(machine epsilon).
+% Therefore this error bound for GEPP is accurate.
+
+%% 
+% Lastly, the second graph showcasing relative forward error doesn't have a
+% significant difference between the error from using inverse Z and using 
+% GEPP. The errors are generally of one magnitude of 10 or less, meaning 
+% that at most one digit of accuracy was lost when solving using inverse Z 
+% as compared to GEPP. From the condition number of A calculated below, we
+% can approximate the bound to be around 10^8 * 2 * 10^-16 = 2 * 10^-8. 
+% Hence, the error bound for forward error is also accurate.
+
+fprintf('Condition number of A: %e\n', cond(A2));
+fprintf('Largest actual error of inverse Z = %e\n', max(abs(rel_forward_err_inv2)));
+fprintf('Largest actual error of GEPP = %e\n', max(abs(rel_forward_err_gepp2)));
+##### SOURCE END #####
+-->
+</body>
+</html>
