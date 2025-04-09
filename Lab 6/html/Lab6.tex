@@ -1,0 +1,375 @@
+
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and republish this document.
+
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{color}
+
+\sloppy
+\definecolor{lightgray}{gray}{0.5}
+\setlength{\parindent}{0pt}
+
+\begin{document}
+
+    
+    
+\section*{Math 315 Lab 6}
+
+\begin{par}
+The following lab explores the composite trapezoidal rule that is used to estimate the integral of different functions.
+\end{par} \vspace{1em}
+
+\subsection*{Contents}
+
+\begin{itemize}
+\setlength{\itemsep}{-1ex}
+   \item The Code
+   \item Integral A
+   \item Integral B
+   \item Integral C
+   \item Integral D
+   \item Integral E
+   \item Integral F
+   \item Integral G
+   \item Integral H
+   \item Convergence Rates
+\end{itemize}
+
+
+\subsection*{The Code}
+
+\begin{par}
+The following code computes the composite trapezoidal rule approximation for n intervals until the error is less than a tolerance level of 1000*epsilon. We estimate the error with the relative difference between the current and next approximation of N and 2N intervals respectively by assuming $f"(\eta _{2N}) = f"(\eta _{N})$. To compute the composite trapezoidal rule approximations for N intervals, we compute the function values at equally spaced points. Then we recursively compute the approximation for 2N intervals by reusing the values computed in the previous approximation and then computing the missing values that are in between the previous intervals. To solve the slow convergence issue and when $I_{2N} = I_N$ for small N, we implement a maximum and minimum number of times, respectively, that the program will loop through and compute the next approximation using 2N intervals. During each loop, we also compute and store the error estimate. Using these values, we can plot the error as the number of intervals N increases.
+\end{par} \vspace{1em}
+\begin{verbatim}
+disp(fileread("composite_trapezoidal_rel.m"));
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}function [is, errs] = composite_trapezoidal_rel(f, a, b)
+    tol = 1000 * eps;
+    min = 2^5;
+    max = 10.^8;
+    dx = b-a;
+    i = [0.5, 0.5] * f([a; b]) .* dx;
+    n = 1;
+    is = [];
+    errs = [];
+    while n < min || (abs((i-i2) ./ i2) > tol && n < max)
+        dx = dx ./ 2;
+        di = sum(f(a+dx:2*dx:b-dx)) * dx;
+        i2 = i;
+        i = i ./ 2 + di;
+        n = 2*n;
+        is = [is; n, i];
+        errs = [errs; n, abs((i-i2) ./ i2)];
+    end
+    errs = errs + tol/100000;
+end
+\end{verbatim} \color{black}
+    
+
+\subsection*{Integral A}
+
+\begin{par}
+$\int^{2\pi}_{0} e^{sinx} ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximations of this integral starts near epsilon then jumps up. The start of the graph is likely because $I_{2N} = I_N$ for N=2. Afterwards, the error rapidly decreases to converge near the tolerance of 1000*epsilon. The rate of convergence is $O(N^{-17})$.
+\end{par} \vspace{1em}
+\begin{verbatim}
+close all;
+f = @(x) exp(sin(x));
+a = 0;
+b = 2 * pi;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure1 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral A');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 1.90354e+11 * x^-16.7988
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_01.eps}
+
+
+\subsection*{Integral B}
+
+\begin{par}
+$\int^{\pi}_{0} e^{sinx} ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximations of this integral converge in a nearly linear line from the N=4 until the tolerance level. This line has a slope of \ensuremath{\tilde{\;}}-2. Since this line is plotted in log scale, the convergence rate of this integral is $O(N^{-2})$
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) exp(sin(x));
+a = 0;
+b = pi;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure2 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral B');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 0.782829 * x^-1.99853
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_02.eps}
+
+
+\subsection*{Integral C}
+
+\begin{par}
+$\int^{2\pi}_{0} cosx ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+Since this integral = 0, I will use the absolute error instead of relative errors. The composite trapezoidal rule approximations of this integral converges very rapidly to the tolerance level from N=2 to N=4. The rate of convergence is $O(N^{-55})$. The points after are zeros and round off errors around epsilon.
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) cos(x);
+a = 0;
+b = 2 * pi;
+[i, errs] = composite_trapezoidal_abs(f, a, b);
+p = polyfit(log(errs(1:2, 1)), log(errs(1:2, 2)), 1);
+x = linspace(min(errs(1:2, 1)), max(errs(1:2, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure3 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral C');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 2.02883e+17 * x^-54.8419
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_03.eps}
+
+
+\subsection*{Integral D}
+
+\begin{par}
+$\int^{2\pi}_{0} (1+cosx) ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximations of this integral converges very rapidly to the tolerance level from N=2 to N=4. The rate of convergence is $O(N^{-58})$. The points after are zeros and round off errors around epsilon.
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) 1 + cos(x);
+a = 0;
+b = 2 * pi;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(1:2, 1)), log(errs(1:2, 2)), 1);
+x = linspace(min(errs(1:2, 1)), max(errs(1:2, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure4 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral D');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 1.1259e+17 * x^-57.6439
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_04.eps}
+
+
+\subsection*{Integral E}
+
+\begin{par}
+$\int^{2\pi}_{0} |cosx| ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximations of this integral starts near epsilon then jumps up. The start of the graph is likely because $I_{2N} = I_N$ for N=2. Afterwards, the errors follow a nearly linear line until convergence at the tolerance level. This line has a slope of \ensuremath{\tilde{\;}}-2. Since this line is plotted in log scale, the convergence rate of this integral is $O(N^{-2})$
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) abs(cos(x));
+a = 0;
+b = 2 * pi;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(3:end, 1)), log(errs(3:end, 2)), 1);
+x = linspace(min(errs(3:end, 1)), max(errs(3:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure5 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral E');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 10.7022 * x^-2.00697
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_05.eps}
+
+
+\subsection*{Integral F}
+
+\begin{par}
+$\int^1_0 x ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximations of this integral are exact since the integral geometrically is a trapezoid and thus converge instantly. The errors are not round-off errors but rather small numbers added to display a graph in log scale. This indicates that the degree of precision is at least 1.
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) x;
+a = 0;
+b = 1;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure6 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral F');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 2.22045e-18 * x^3.27893e-15
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_06.eps}
+
+
+\subsection*{Integral G}
+
+\begin{par}
+$\int^1_0 x^2 ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximation of this integral converges to the tolerance level in a nearly linear line in log scale. This line has a slope of \ensuremath{\tilde{\;}}-2. Since this line is plotted in log scale, the convergence rate of this integral is $O(N^{-2})$. This indicates that the degree of preicion is less than 2.
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) x.^2;
+a = 0;
+b = 1;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure7 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral G');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 1.4406 * x^-1.99558
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_07.eps}
+
+
+\subsection*{Integral H}
+
+\begin{par}
+$\int^1_0 x^3 ~dx$
+\end{par} \vspace{1em}
+\begin{par}
+The composite trapezoidal rule approximation of this integral converges to the tolerance level in a nearly linear line in log scale. This line has a slope of \ensuremath{\tilde{\;}}-2. Since this line is plotted in log scale, the convergence rate of this integral is $O(N^{-2})$
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) x.^3;
+a = 0;
+b = 1;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure8 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Integral H');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 2.82458 * x^-1.9945
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_08.eps}
+
+
+\subsection*{Convergence Rates}
+
+\begin{par}
+From the convergence rates of integrals, F, G, and H, we can determine that the degree of precision for the composite trapezoidal rule is 1, since the integral for f(x) = x converged instantly but not the integrals for f(x) = x\^{}2 and f(x) = x\^{}3. From this, I conjecture that the rate of convergence in terms of the number of sub-intervals is $O(N^{-(DOP + 1)})$. As the degree of precision is 1, the convergence rate of the integral should be $O(N^{-2})$, which is shown in integrals B, E, G, and H. To test this, I will approximate the integral of $f(x) = 5x^7 - 8x^3$ on the interval 0 to 1. In the graph shown below, the convergence rate is $O(N^{-2})$.
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) 5*x.^7-8*x.^3;
+a = 0;
+b = 1;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(2:end, 1)), log(errs(2:end, 2)), 1);
+x = linspace(min(errs(2:end, 1)), max(errs(2:end, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure9 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Test Integral 1');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 1.76531 * x^-1.98856
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_09.eps}
+\begin{par}
+I also conjecture that integrals over exactly one period of a smooth and periodic function have superconvergence, meaning that it will converge much quicker than expected. This is shown in integrals A, C, and D. To test this, I will approximate the integral of $f(x) = cosx + sinx + 1$ on the interval $\frac{\pi}{4}$ to $\frac{9\pi}{4}$. The convergence rate is $O(N^{-52})$
+\end{par} \vspace{1em}
+\begin{verbatim}
+f = @(x) sin(x) + cos(x) + 1;
+a = pi / 4;
+b = 9 * pi / 4;
+[i, errs] = composite_trapezoidal_rel(f, a, b);
+p = polyfit(log(errs(1:2, 1)), log(errs(1:2, 2)), 1);
+x = linspace(min(errs(1:2, 1)), max(errs(1:2, 1)));
+y = exp(p(2)) * x .^ p(1);
+fprintf('y = %g * x^%g\n', exp(p(2)), p(1));
+figure10 = figure();
+loglog(errs(:, 1), errs(:, 2), '-o', x, y);
+xlabel('N');
+ylabel('Relative Error');
+legend('Rel Errs', 'Convergence Rate Line');
+title('Convergence Graph for Test Integral 2');
+\end{verbatim}
+
+        \color{lightgray} \begin{verbatim}y = 2.38995e+15 * x^-51.8575
+\end{verbatim} \color{black}
+    
+\includegraphics [width=4in]{Lab6_10.eps}
+
+
+
+\end{document}
+

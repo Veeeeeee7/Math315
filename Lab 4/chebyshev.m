@@ -1,4 +1,4 @@
-function y = chebfit(x_data, f_data, x)
+function [y, T] = chebyshev(x_data, f_data, x)
 %
 % y = chebfit(x_data, f_data, x);
 %
@@ -13,7 +13,7 @@ function y = chebfit(x_data, f_data, x)
 n = length(x_data);
 xmax = max(x_data);
 xmin = min(x_data);
-xx_data = (2*x_data - xmax - xmin)/(xmax - xmin);
+xx_data = (2*x_data - xmax - xmin)./(xmax - xmin);
 T = zeros(n, n);
 T(:,1) = ones(n,1);
 T(:,2) = xx_data;
